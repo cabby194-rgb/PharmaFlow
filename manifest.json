@@ -1,0 +1,15 @@
+{
+  "name": "Towa Order Bergaglio",
+  "short_name": "TowaOrder",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0A2540",
+  "theme_color": "#0A2540",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3022/3022127.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

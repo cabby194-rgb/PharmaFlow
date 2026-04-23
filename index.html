@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <title>Towa Order - Bergaglio</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --navy: #0A2540; --teal: #00A896; --fog: #F4F7FA; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid var(--teal); margin-bottom: 20px; padding-bottom: 10px; }
+        h1 { color: var(--navy); font-size: 22px; margin: 5px 0; }
+        .subtitle { color: var(--teal); font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        label { font-size: 12px; color: #666; font-weight: bold; }
+        input, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .btn-wa { background: #25D366; color: white; margin-top: 10px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .qty-input { width: 70px; text-align: center; margin: 0; }
+        .footer-text { font-size: 11px; text-align: center; color: #999; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="subtitle">Agente Towa Pharmaceutical</div>
+        <h1>Alberto Bergaglio</h1>
+    </div>
+
+    <label>NOME FARMACIA *</label>
+    <input type="text" id="farmName" placeholder="Inserisci il nome della farmacia">
+
+    <label>NOTE ORDINE (es. urgenza, sconti)</label>
+    <textarea id="farmNotes" placeholder="Inserisci eventuali note..."></textarea>
+    
+    <div id="drugList">
+        <div class="item-row">
+            <span>Amoxicillina 500mg</span>
+            <input type="number" class="qty-input" data-name="Amoxicillina" data-desc="500mg × 24 cps" value="0" min="0">
+        </div>
+        <div class="item-row">
+            <span>Ibuprofene 400mg</span>
+            <input type="number" class="qty-input" data-name="Ibuprofene" data-desc="400mg × 24 cpr" value="0" min="0">
+        </div>
+        <div class="item-row">
+            <span>Paracetamolo 1000mg</span>
+            <input type="number" class="qty-input" data-name="Paracetamolo" data-desc="1000mg × 16 cpr" value="0" min="0">
+        </div>
+    </div>
+
+    <button class="btn btn-wa" onclick="sendToAlberto()">INVIA ORDINE SU WHATSAPP</button>
+    <p class="footer-text">L'ordine verrà inviato direttamente ad Alberto Bergaglio</p>
+</div>
+
+<script>
+    async function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const farmacia = document.getElementById('farmName').value || "Farmacia Non Specificata";
+        const note = document.getElementById('farmNotes').value || "Nessuna nota";
+        
+        // Intestazione PDF personalizzata
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Agente Towa Pharmaceutical: Alberto Bergaglio", 10, 10);
+        
+        doc.setFontSize(22);
+        doc.setTextColor(10, 37, 64);
+        doc.text("ORDINE PRODOTTI", 10, 25);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text(`CLIENTE: ${farmacia}`, 10, 35);
+        doc.text(`DATA: ${new Date().toLocaleDateString()}`, 10, 42);
+        doc.text(`NOTE: ${note}`, 10, 49);
+
+        const rows = [];
+        document.querySelectorAll('.qty-input').forEach(input => {
+            if (parseInt(input.value) > 0) {
+                rows.push([input.dataset.name, input.dataset.desc, input.value]);
+            }
+        });
+
+        doc.autoTable({
+            startY: 55,
+            head: [['Prodotto', 'Descrizione', 'Quantità']],
+            body: rows,
+            headStyles: { fillColor: [0, 168, 150] }
+        });
+
+        return { doc, farmacia, rows };
+    }
+
+    async function sendToAlberto() {
+        const farmacia = document.getElementById('farmName').value;
+        if (!farmacia) {
+            alert("Per favore, inserisci il nome della farmacia.");
+            return;
+        }
+
+        const { doc, rows } = await generatePDF();
+        const mioNumero = "393935687977";
+        
+        // Creazione file per condivisione
+        const pdfBlob = doc.output('blob');
+        const file = new File([pdfBlob], `Ordine_${farmacia}.pdf`, { type: "application/pdf" });
+
+        // Messaggio WhatsApp
+        let messaggio = `*NUOVO ORDINE DA APP*\n\n*Farmacia:* ${farmacia}\n*Prodotti:* ${rows.length}\n\nTi invio il PDF con i dettagli.`;
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Ordine Towa',
+                    text: messaggio
+                });
+            } catch (err) {
+                window.open(`https://wa.me/${mioNumero}?text=${encodeURIComponent(messaggio)}`);
+            }
+        } else {
+            doc.save(`Ordine_${farmacia}.pdf`);
+            window.open(`https://wa.me/${mioNumero}?text=${encodeURIComponent(messaggio + " (PDF scaricato nel telefono)")}`);
+        }
+    }
+</script>
+</body>
+</html>
