@@ -7,169 +7,131 @@
     
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/albeberg/ordine/main/icon.png">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --towa-blue: #004085; --towa-teal: #00A896; --light-bg: #f8f9fa; }
-        body { font-family: 'Inter', sans-serif; background: var(--light-bg); margin: 0; padding: 0; padding-bottom: 80px; }
-        .header { background: var(--towa-blue); color: white; padding: 25px 15px; text-align: center; border-radius: 0 0 20px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+        :root { --navy: #0A2540; --teal: #00A896; --fog: #F4F7FA; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; padding-bottom: 30px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        .section-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .section-title { color: var(--towa-teal); font-weight: 700; border-bottom: 2px solid var(--light-bg); padding-bottom: 8px; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--fog); padding-bottom: 15px; }
+        .header h1 { color: var(--navy); font-size: 24px; margin: 5px 0; }
+        .subtitle { color: var(--teal); font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #666; }
-        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: var(--fog); font-size: 16px; }
 
-        .product-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dotted #eee; }
-        .product-info { flex: 1; padding-right: 10px; }
-        .product-name { font-weight: 600; font-size: 15px; display: block; }
-        .product-desc { font-size: 12px; color: #888; }
-        .qty-input { width: 65px; padding: 10px; border: 2px solid #eee; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; color: var(--towa-blue); }
-        .qty-input:focus { border-color: var(--towa-teal); outline: none; }
+        .section-name { background: var(--navy); color: white; padding: 8px 15px; border-radius: 8px; font-size: 13px; margin: 20px 0 10px 0; font-weight: bold; }
+        
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--fog); }
+        .item-info { flex: 1; }
+        .item-name { font-weight: 600; font-size: 15px; color: var(--navy); display: block; }
+        .item-desc { font-size: 12px; color: #999; }
+        
+        .qty-input { width: 60px; padding: 8px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); }
+        .qty-input:focus { border-color: var(--teal); outline: none; background: white; }
 
-        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; display: flex; gap: 10px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
-        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .btn-preview { background: #6c757d; color: white; }
-        .btn-wa { background: #25D366; color: white; display: none; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; transition: 0.2s; }
+        .btn-check { background: var(--navy); color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-pdf { background: var(--teal); color: white; }
+        .btn-edit { background: #eee; color: #666; }
 
-        /* Modal Riepilogo */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: white; border-radius: 15px; padding: 20px; max-height: 80%; overflow-y: auto; }
-        .close-btn { background: #ff4444; color: white; padding: 10px; width: 100%; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; }
+        #modal-review { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .review-title { color: var(--navy); border-bottom: 2px solid var(--teal); padding-bottom: 10px; margin-bottom: 20px; }
+        .review-list { margin-bottom: 30px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Towa Order Pro</h1>
-    <p>Alberto Bergaglio - Consulente Specialistico</p>
+<div id="main-app" class="container">
+    <div class="header">
+        <div class="subtitle">Agente Towa Pharmaceutical</div>
+        <h1>Alberto Bergaglio</h1>
+    </div>
+
+    <label>Farmacia</label>
+    <input type="text" id="farmName" placeholder="Nome della farmacia">
+
+    <label>Note</label>
+    <textarea id="farmNotes" rows="2" placeholder="Note per l'ordine..."></textarea>
+
+    <div class="section-name">Cardiovascolare</div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Ramipril</span><span class="item-desc">Tutti i dosaggi</span></div><input type="number" class="qty-input" data-name="Ramipril" min="0"></div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Atorvastatina</span><span class="item-desc">10/20/40/80 mg</span></div><input type="number" class="qty-input" data-name="Atorvastatina" min="0"></div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Bisoprololo</span><span class="item-desc">Dosaggi cardiologici</span></div><input type="number" class="qty-input" data-name="Bisoprololo" min="0"></div>
+
+    <div class="section-name">Gastrointestinale</div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Pantoprazolo</span><span class="item-desc">20/40 mg</span></div><input type="number" class="qty-input" data-name="Pantoprazolo" min="0"></div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Omeprazolo</span><span class="item-desc">10/20 mg</span></div><input type="number" class="qty-input" data-name="Omeprazolo" min="0"></div>
+
+    <div class="section-name">Dolore e SNC</div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Ibuprofene</span><span class="item-desc">400/600 mg</span></div><input type="number" class="qty-input" data-name="Ibuprofene" min="0"></div>
+    <div class="item-row"><div class="item-info"><span class="item-name">Paracetamolo</span><span class="item-desc">500/1000 mg</span></div><input type="number" class="qty-input" data-name="Paracetamolo" min="0"></div>
+
+    <button class="btn btn-check" onclick="apriRiepilogo()">VERIFICA ORDINE</button>
 </div>
 
-<div class="container">
-    <div class="section-card">
-        <div class="input-group">
-            <label>NOME FARMACIA</label>
-            <input type="text" id="farmacia" placeholder="Esempio: Farmacia Centrale">
-        </div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">Sistema Cardiovascolare</div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Ramipril</span><span class="product-desc">2,5 - 5 - 10 mg</span></div><input type="number" class="qty" data-name="Ramipril" data-desc="Cardiovascolare" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Atorvastatina</span><span class="product-desc">10 - 20 - 40 - 80 mg</span></div><input type="number" class="qty" data-name="Atorvastatina" data-desc="Cardiovascolare" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Amlodipina</span><span class="product-desc">5 - 10 mg</span></div><input type="number" class="qty" data-name="Amlodipina" data-desc="Cardiovascolare" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Bisoprololo</span><span class="product-desc">1,25 a 10 mg</span></div><input type="number" class="qty" data-name="Bisoprololo" data-desc="Cardiovascolare" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Valsartan</span><span class="product-desc">40 a 320 mg</span></div><input type="number" class="qty" data-name="Valsartan" data-desc="Cardiovascolare" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Furosemide</span><span class="product-desc">25 - 500 mg / Fiale</span></div><input type="number" class="qty" data-name="Furosemide" data-desc="Cardiovascolare" min="0"></div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">Gastrointestinale</div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Pantoprazolo</span><span class="product-desc">20 - 40 mg</span></div><input type="number" class="qty" data-name="Pantoprazolo" data-desc="Gastroprotettore" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Omeprazolo</span><span class="product-desc">10 - 20 mg</span></div><input type="number" class="qty" data-name="Omeprazolo" data-desc="Gastroprotettore" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Esomeprazolo</span><span class="product-desc">20 - 40 mg</span></div><input type="number" class="qty" data-name="Esomeprazolo" data-desc="Gastroprotettore" min="0"></div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">Nervoso e Dolore</div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Ibuprofene</span><span class="product-desc">200 - 400 - 600 mg</span></div><input type="number" class="qty" data-name="Ibuprofene" data-desc="Dolore" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Ketoprofene</span><span class="product-desc">50 - 80 - 200 mg RP</span></div><input type="number" class="qty" data-name="Ketoprofene" data-desc="Dolore" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Paracetamolo</span><span class="product-desc">500 - 1000 mg</span></div><input type="number" class="qty" data-name="Paracetamolo" data-desc="Analgetico" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Sertralina</span><span class="product-desc">50 - 100 mg</span></div><input type="number" class="qty" data-name="Sertralina" data-desc="SSRI" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Alprazolam</span><span class="product-desc">0,25 - 0,50 - 1 mg</span></div><input type="number" class="qty" data-name="Alprazolam" data-desc="Ansiolitico" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Pregabalin</span><span class="product-desc">25 a 300 mg</span></div><input type="number" class="qty" data-name="Pregabalin" data-desc="Neuropatico" min="0"></div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">Antibiotici e Antinfettivi</div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Amoxicillina + Clav.</span><span class="product-desc">875mg + 125mg</span></div><input type="number" class="qty" data-name="Amoxicillina+Clav" data-desc="Antibiotico" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Azitromicina</span><span class="product-desc">500 mg</span></div><input type="number" class="qty" data-name="Azitromicina" data-desc="Antibiotico" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Ciprofloxacina</span><span class="product-desc">250 - 500 - 750 mg</span></div><input type="number" class="qty" data-name="Ciprofloxacina" data-desc="Antibiotico" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Fluconazolo</span><span class="product-desc">100 - 150 - 200 mg</span></div><input type="number" class="qty" data-name="Fluconazolo" data-desc="Antimicotico" min="0"></div>
-    </div>
-
-    <div class="section-card">
-        <div class="section-title">Metabolismo e Specialità</div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Metformina</span><span class="product-desc">500 - 850 - 1000 mg</span></div><input type="number" class="qty" data-name="Metformina" data-desc="Diabete" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Tadalafil / Sildenafil</span><span class="product-desc">Tutti i dosaggi</span></div><input type="number" class="qty" data-name="PDE5-Inibitori" data-desc="Urologia" min="0"></div>
-        <div class="product-row"><div class="product-info"><span class="product-name">Levotiroxina</span><span class="product-desc">25 a 200 mcg</span></div><input type="number" class="qty" data-name="Levotiroxina" data-desc="Tiroide" min="0"></div>
-    </div>
-
-    <div class="section-card">
-        <div class="input-group">
-            <label>NOTE AGGIUNTIVE</label>
-            <textarea id="note" rows="2" placeholder="Specificare dosaggi o scadenze particolari..."></textarea>
-        </div>
-    </div>
-</div>
-
-<div class="action-bar">
-    <button class="btn btn-preview" onclick="mostraAnteprima()">VERIFICA ORDINE</button>
-    <button id="wa-btn" class="btn btn-wa" onclick="inviaWhatsApp()">INVIA ORDINE</button>
-</div>
-
-<div id="modal">
-    <div class="modal-content">
-        <h3 style="color:var(--towa-blue); margin-top:0;">Riepilogo Ordine</h3>
-        <div id="riepilogo-testo" style="font-size:14px; line-height:1.6;"></div>
-        <button class="close-btn" onclick="chiudiModal()">MODIFICA</button>
-    </div>
+<div id="modal-review">
+    <h2 class="review-title">Riepilogo Ordine</h2>
+    <div id="review-content" class="review-list"></div>
+    
+    <button class="btn btn-wa" onclick="inviaWA()">CONFERMA E INVIA WHATSAPP</button>
+    <button class="btn btn-pdf" onclick="scaricaPDF()">SALVA COPIA PDF</button>
+    <button class="btn btn-edit" onclick="chiudiRiepilogo()">MODIFICA ORDINE</button>
 </div>
 
 <script>
-    function generaDati() {
-        const farmacia = document.getElementById('farmacia').value || "Farmacia Non Indicata";
-        const note = document.getElementById('note').value || "Nessuna";
-        let prodotti = [];
-        
-        document.querySelectorAll('.qty').forEach(input => {
+    function getDati() {
+        const farmacia = document.getElementById('farmName').value || "Farmacia";
+        const note = document.getElementById('farmNotes').value || "Nessuna";
+        let righe = [];
+        document.querySelectorAll('.qty-input').forEach(input => {
             if(input.value > 0) {
-                prodotti.push({
-                    nome: input.dataset.name,
-                    qty: input.value,
-                    cat: input.dataset.desc
-                });
+                righe.push({ nome: input.dataset.name, qty: input.value });
             }
         });
-        return { farmacia, note, prodotti };
+        return { farmacia, note, righe };
     }
 
-    function mostraAnteprima() {
-        const dati = generaDati();
-        if(dati.prodotti.length === 0) { alert("Inserisci almeno un prodotto!"); return; }
-
-        let html = `<b>Farmacia:</b> ${dati.farmacia}<br><br><b>Prodotti:</b><br>`;
-        dati.prodotti.forEach(p => {
-            html += `• ${p.nome}: <b>${p.qty}</b> pz<br>`;
-        });
+    function apriRiepilogo() {
+        const dati = getDati();
+        if(dati.righe.length === 0) { alert("Inserisci almeno un prodotto."); return; }
+        
+        let html = `<b>Farmacia:</b> ${dati.farmacia}<br><br>`;
+        dati.righe.forEach(r => { html += `• ${r.nome}: <b>${r.qty}</b> pz<br>`; });
         html += `<br><b>Note:</b> ${dati.note}`;
-
-        document.getElementById('riepilogo-testo').innerHTML = html;
-        document.getElementById('modal').style.display = 'block';
-        document.getElementById('wa-btn').style.display = 'block';
+        
+        document.getElementById('review-content').innerHTML = html;
+        document.getElementById('modal-review').style.display = 'block';
+        window.scrollTo(0,0);
     }
 
-    function chiudiModal() { document.getElementById('modal').style.display = 'none'; }
+    function chiudiRiepilogo() { document.getElementById('modal-review').style.display = 'none'; }
 
-    async function inviaWhatsApp() {
-        const dati = generaDati();
-        let testo = `*ORDINE TOWA - ALBERTO BERGAGLIO*\n\n`;
-        testo += `*Farmacia:* ${dati.farmacia}\n\n`;
-        dati.prodotti.forEach(p => {
-            testo += `- ${p.nome}: *${p.qty}* pz\n`;
-        });
-        testo += `\n*Note:* ${dati.note}`;
+    function inviaWA() {
+        const dati = getDati();
+        let msg = `*ORDINE TOWA - BERGAGLIO*\n\n*Farmacia:* ${dati.farmacia}\n\n`;
+        dati.righe.forEach(r => { msg += `- ${r.nome}: *${r.qty}*\n`; });
+        msg += `\n*Note:* ${dati.note}`;
+        window.open(`https://wa.me/393935687977?text=${encodeURIComponent(msg)}`);
+    }
 
-        const url = `https://wa.me/393935687977?text=${encodeURIComponent(testo)}`;
-        window.open(url, '_blank');
+    function scaricaPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const dati = getDati();
+        
+        doc.setFontSize(10).text("Agente Towa: Alberto Bergaglio", 10, 10);
+        doc.setFontSize(18).text("Riepilogo Ordine", 10, 25);
+        doc.setFontSize(12).text(`Cliente: ${dati.farmacia}`, 10, 35);
+        
+        const tab = dati.righe.map(r => [r.nome, r.qty]);
+        doc.autoTable({ startY: 45, head: [['Prodotto', 'Quantità']], body: tab });
+        doc.save(`Ordine_${dati.farmacia}.pdf`);
     }
 </script>
 </body>
