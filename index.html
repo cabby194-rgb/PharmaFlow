@@ -4,134 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Towa Order - Alberto Bergaglio</title>
-    
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/albeberg/ordine/main/icon.png">
     <meta name="mobile-web-app-capable" content="yes">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
         :root { --navy: #0A2540; --teal: #00A896; --fog: #F4F7FA; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; padding-bottom: 30px; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--fog); padding-bottom: 15px; }
         .header h1 { color: var(--navy); font-size: 24px; margin: 5px 0; }
-        .subtitle { color: var(--teal); font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        
-        label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: var(--fog); font-size: 16px; }
-
+        .subtitle { color: var(--teal); font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        label { font-size: 11px; color: #888; font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: var(--fog); font-size: 16px; }
         .section-name { background: var(--navy); color: white; padding: 8px 15px; border-radius: 8px; font-size: 13px; margin: 20px 0 10px 0; font-weight: bold; }
-        
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--fog); }
-        .item-info { flex: 1; }
-        .item-name { font-weight: 600; font-size: 15px; color: var(--navy); display: block; }
-        .item-desc { font-size: 12px; color: #999; }
-        
-        .qty-input { width: 60px; padding: 8px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); }
-        .qty-input:focus { border-color: var(--teal); outline: none; background: white; }
-
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; transition: 0.2s; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid var(--fog); }
+        .item-name { font-weight: 600; font-size: 14px; color: var(--navy); flex: 1; }
+        .qty-input { width: 65px; padding: 10px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; }
         .btn-check { background: var(--navy); color: white; }
         .btn-wa { background: #25D366; color: white; }
         .btn-pdf { background: var(--teal); color: white; }
         .btn-edit { background: #eee; color: #666; }
-
         #modal-review { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .review-title { color: var(--navy); border-bottom: 2px solid var(--teal); padding-bottom: 10px; margin-bottom: 20px; }
-        .review-list { margin-bottom: 30px; }
     </style>
 </head>
 <body>
-
 <div id="main-app" class="container">
     <div class="header">
         <div class="subtitle">Agente Towa Pharmaceutical</div>
         <h1>Alberto Bergaglio</h1>
     </div>
-
     <label>Farmacia</label>
     <input type="text" id="farmName" placeholder="Nome della farmacia">
-
     <label>Note</label>
-    <textarea id="farmNotes" rows="2" placeholder="Note per l'ordine..."></textarea>
+    <textarea id="farmNotes" rows="2" placeholder="Note (es. sconti, urgenze)"></textarea>
 
-    <div class="section-name">Cardiovascolare</div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Ramipril</span><span class="item-desc">Tutti i dosaggi</span></div><input type="number" class="qty-input" data-name="Ramipril" min="0"></div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Atorvastatina</span><span class="item-desc">10/20/40/80 mg</span></div><input type="number" class="qty-input" data-name="Atorvastatina" min="0"></div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Bisoprololo</span><span class="item-desc">Dosaggi cardiologici</span></div><input type="number" class="qty-input" data-name="Bisoprololo" min="0"></div>
+    <div class="section-name">SISTEMA CARDIOVASCOLARE</div>
+    <div class="item-row"><span class="item-name">Atorvastatina (10/20/40/80mg)</span><input type="number" class="qty-input" data-name="Atorvastatina" min="0"></div>
+    <div class="item-row"><span class="item-name">Bisoprololo (1.25/2.5/3.75/5/10mg)</span><input type="number" class="qty-input" data-name="Bisoprololo" min="0"></div>
+    <div class="item-row"><span class="item-name">Ramipril (2.5/5/10mg)</span><input type="number" class="qty-input" data-name="Ramipril" min="0"></div>
+    <div class="item-row"><span class="item-name">Valsartan (40/80/160/320mg)</span><input type="number" class="qty-input" data-name="Valsartan" min="0"></div>
+    <div class="item-row"><span class="item-name">Amlodipina (5/10mg)</span><input type="number" class="qty-input" data-name="Amlodipina" min="0"></div>
 
-    <div class="section-name">Gastrointestinale</div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Pantoprazolo</span><span class="item-desc">20/40 mg</span></div><input type="number" class="qty-input" data-name="Pantoprazolo" min="0"></div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Omeprazolo</span><span class="item-desc">10/20 mg</span></div><input type="number" class="qty-input" data-name="Omeprazolo" min="0"></div>
+    <div class="section-name">APPARATO GASTROINTESTINALE</div>
+    <div class="item-row"><span class="item-name">Pantoprazolo (20/40mg)</span><input type="number" class="qty-input" data-name="Pantoprazolo" min="0"></div>
+    <div class="item-row"><span class="item-name">Esomeprazolo (20/40mg)</span><input type="number" class="qty-input" data-name="Esomeprazolo" min="0"></div>
+    <div class="item-row"><span class="item-name">Omeprazolo (10/20mg)</span><input type="number" class="qty-input" data-name="Omeprazolo" min="0"></div>
 
-    <div class="section-name">Dolore e SNC</div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Ibuprofene</span><span class="item-desc">400/600 mg</span></div><input type="number" class="qty-input" data-name="Ibuprofene" min="0"></div>
-    <div class="item-row"><div class="item-info"><span class="item-name">Paracetamolo</span><span class="item-desc">500/1000 mg</span></div><input type="number" class="qty-input" data-name="Paracetamolo" min="0"></div>
+    <div class="section-name">SISTEMA NERVOSO E DOLORE</div>
+    <div class="item-row"><span class="item-name">Alprazolam (0.25/0.50/1mg - Gtt)</span><input type="number" class="qty-input" data-name="Alprazolam" min="0"></div>
+    <div class="item-row"><span class="item-name">Sertralina (50/100mg)</span><input type="number" class="qty-input" data-name="Sertralina" min="0"></div>
+    <div class="item-row"><span class="item-name">Paracetamolo (500/1000mg)</span><input type="number" class="qty-input" data-name="Paracetamolo" min="0"></div>
+    <div class="item-row"><span class="item-name">Ibuprofene (400/600mg)</span><input type="number" class="qty-input" data-name="Ibuprofene" min="0"></div>
+    <div class="item-row"><span class="item-name">Pregabalin (Tutti i dosaggi)</span><input type="number" class="qty-input" data-name="Pregabalin" min="0"></div>
+
+    <div class="section-name">ANTIBIOTICI</div>
+    <div class="item-row"><span class="item-name">Amoxicillina+Clav. (875+125mg)</span><input type="number" class="qty-input" data-name="Amoxicillina+Clav" min="0"></div>
+    <div class="item-row"><span class="item-name">Azitromicina (500mg)</span><input type="number" class="qty-input" data-name="Azitromicina" min="0"></div>
+    <div class="item-row"><span class="item-name">Ciprofloxacina (250/500/750mg)</span><input type="number" class="qty-input" data-name="Ciprofloxacina" min="0"></div>
 
     <button class="btn btn-check" onclick="apriRiepilogo()">VERIFICA ORDINE</button>
 </div>
 
 <div id="modal-review">
-    <h2 class="review-title">Riepilogo Ordine</h2>
-    <div id="review-content" class="review-list"></div>
-    
-    <button class="btn btn-wa" onclick="inviaWA()">CONFERMA E INVIA WHATSAPP</button>
-    <button class="btn btn-pdf" onclick="scaricaPDF()">SALVA COPIA PDF</button>
-    <button class="btn btn-edit" onclick="chiudiRiepilogo()">MODIFICA ORDINE</button>
+    <h2 style="color:var(--navy)">Verifica il tuo Ordine</h2>
+    <div id="review-content" style="background:var(--fog); padding:15px; border-radius:10px; margin-bottom:20px;"></div>
+    <button class="btn btn-wa" onclick="inviaWA()">INVIA SU WHATSAPP</button>
+    <button class="btn btn-pdf" onclick="scaricaPDF()">SALVA PDF (ARCHIVIO)</button>
+    <button class="btn btn-edit" onclick="chiudiRiepilogo()">TORNA ALLA MODIFICA</button>
 </div>
 
 <script>
     function getDati() {
-        const farmacia = document.getElementById('farmName').value || "Farmacia";
-        const note = document.getElementById('farmNotes').value || "Nessuna";
-        let righe = [];
-        document.querySelectorAll('.qty-input').forEach(input => {
-            if(input.value > 0) {
-                righe.push({ nome: input.dataset.name, qty: input.value });
-            }
+        const f = document.getElementById('farmName').value || "Farmacia";
+        const n = document.getElementById('farmNotes').value || "Nessuna";
+        let r = [];
+        document.querySelectorAll('.qty-input').forEach(i => {
+            if(i.value > 0) r.push({nome: i.dataset.name, qty: i.value});
         });
-        return { farmacia, note, righe };
+        return { farmacia: f, note: n, righe: r };
     }
-
     function apriRiepilogo() {
-        const dati = getDati();
-        if(dati.righe.length === 0) { alert("Inserisci almeno un prodotto."); return; }
-        
-        let html = `<b>Farmacia:</b> ${dati.farmacia}<br><br>`;
-        dati.righe.forEach(r => { html += `• ${r.nome}: <b>${r.qty}</b> pz<br>`; });
-        html += `<br><b>Note:</b> ${dati.note}`;
-        
-        document.getElementById('review-content').innerHTML = html;
+        const d = getDati();
+        if(d.righe.length === 0) { alert("Ordine vuoto!"); return; }
+        let h = `<b>Farmacia:</b> ${d.farmacia}<br><br>`;
+        d.righe.forEach(x => h += `• ${x.nome}: <b>${x.qty}</b><br>`);
+        h += `<br><b>Note:</b> ${d.note}`;
+        document.getElementById('review-content').innerHTML = h;
         document.getElementById('modal-review').style.display = 'block';
-        window.scrollTo(0,0);
     }
-
     function chiudiRiepilogo() { document.getElementById('modal-review').style.display = 'none'; }
-
     function inviaWA() {
-        const dati = getDati();
-        let msg = `*ORDINE TOWA - BERGAGLIO*\n\n*Farmacia:* ${dati.farmacia}\n\n`;
-        dati.righe.forEach(r => { msg += `- ${r.nome}: *${r.qty}*\n`; });
-        msg += `\n*Note:* ${dati.note}`;
-        window.open(`https://wa.me/393935687977?text=${encodeURIComponent(msg)}`);
+        const d = getDati();
+        let m = `*ORDINE TOWA - ALBERTO BERGAGLIO*\n\n*Farmacia:* ${d.farmacia}\n\n`;
+        d.righe.forEach(x => m += `- ${x.nome}: *${x.qty}*\n`);
+        m += `\n*Note:* ${d.note}`;
+        window.open(`https://wa.me/393935687977?text=${encodeURIComponent(m)}`);
     }
-
     function scaricaPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const dati = getDati();
-        
+        const d = getDati();
         doc.setFontSize(10).text("Agente Towa: Alberto Bergaglio", 10, 10);
-        doc.setFontSize(18).text("Riepilogo Ordine", 10, 25);
-        doc.setFontSize(12).text(`Cliente: ${dati.farmacia}`, 10, 35);
-        
-        const tab = dati.righe.map(r => [r.nome, r.qty]);
-        doc.autoTable({ startY: 45, head: [['Prodotto', 'Quantità']], body: tab });
-        doc.save(`Ordine_${dati.farmacia}.pdf`);
+        doc.setFontSize(18).text("Ordine Prodotti Towa", 10, 25);
+        doc.autoTable({ startY: 40, head: [['Prodotto', 'Quantità']], body: d.righe.map(x => [x.nome, x.qty]) });
+        doc.save(`Ordine_${d.farmacia}.pdf`);
     }
 </script>
 </body>
