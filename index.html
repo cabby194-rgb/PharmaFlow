@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,128 +16,158 @@
 
     <style>
         :root { --navy: #0A2540; --teal: #00A896; --fog: #F4F7FA; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 0; overflow-x: hidden; }
+        .page { display: none; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .active { display: block; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--fog); padding-bottom: 15px; }
+        .header { text-align: center; margin-bottom: 25px; }
         .header h1 { color: var(--navy); font-size: 22px; margin: 5px 0; }
-        .subtitle { color: var(--teal); font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { color: var(--teal); font-size: 13px; font-weight: bold; text-transform: uppercase; }
         
         label { font-size: 11px; color: #888; font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
-        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: #fff; font-size: 16px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: var(--fog); font-size: 16px; margin-bottom: 10px; }
 
-        .product-list { margin-top: 20px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--fog); }
-        .item-name { font-weight: 600; font-size: 15px; color: var(--navy); flex: 1; }
-        .qty-input { width: 65px; padding: 10px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); appearance: none; }
-        
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; transition: 0.3s; }
-        .btn-check { background: var(--navy); color: white; }
-        .btn-wa { background: #25D366; color: white; }
-        .btn-edit { background: #eee; color: #666; }
+        .item-name { font-weight: 600; font-size: 14px; color: var(--navy); flex: 1; padding-right: 10px; }
+        .qty-input { width: 70px; padding: 8px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; color: var(--teal); }
 
-        #modal-review { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .review-card { background: var(--fog); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; transition: 0.3s; }
+        .btn-next { background: var(--navy); color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-pdf { background: var(--teal); color: white; }
+        .btn-back { background: #eee; color: #666; }
+
+        .summary-card { background: var(--fog); padding: 15px; border-radius: 15px; font-size: 14px; line-height: 1.6; }
     </style>
 </head>
 <body>
 
-<div id="app-content" class="container">
-    <div class="header">
-        <div class="subtitle">Consulenza Alberto Bergaglio</div>
-        <h1>Towa Order List</h1>
-    </div>
-
-    <label>Farmacia</label>
-    <input type="text" id="farmName" placeholder="Inserisci nome farmacia">
-
-    <label>Prodotti (Ordine Alfabetico)</label>
-    <div id="product-container" class="product-list">
+<div id="step1" class="page active">
+    <div class="container">
+        <div class="header">
+            <div class="subtitle">Servizio Ordini Bergaglio</div>
+            <h1>Configurazione Ordine</h1>
         </div>
-
-    <label>Note ordine</label>
-    <textarea id="farmNotes" rows="2" placeholder="Note su dosaggi o urgenze..."></textarea>
-
-    <button class="btn btn-check" onclick="apriRiepilogo()">VERIFICA BOZZA</button>
+        <label>Nome Farmacia</label>
+        <input type="text" id="farmName" placeholder="Inserisci nome della farmacia">
+        
+        <label>Data Ordine</label>
+        <input type="date" id="orderDate">
+        
+        <label>Note Iniziali</label>
+        <textarea id="farmNotes" rows="3" placeholder="Note generali..."></textarea>
+        
+        <button class="btn btn-next" onclick="vaiA(2)">PROSEGUI AL LISTINO</button>
+    </div>
 </div>
 
-<div id="modal-review">
-    <h2 style="color:var(--navy)">Anteprima Ordine</h2>
-    <div id="review-content" class="review-card"></div>
-    
-    <button class="btn btn-wa" onclick="inviaTutto()">SCARICA PDF E INVIA WHATSAPP</button>
-    <button class="btn btn-edit" onclick="chiudiRiepilogo()">TORNA ALLA MODIFICA (BOZZA)</button>
+<div id="step2" class="page">
+    <div class="container">
+        <div class="header">
+            <div class="subtitle">Towa Pharmaceutical</div>
+            <h1>Inserimento Quantità</h1>
+        </div>
+        <div id="product-list"></div>
+        
+        <button class="btn btn-next" onclick="vaiA(3)">VERIFICA RIEPILOGO</button>
+        <button class="btn btn-back" onclick="vaiA(1)">TORNA AI DATI BASE</button>
+    </div>
+</div>
+
+<div id="step3" class="page">
+    <div class="container">
+        <div class="header">
+            <div class="subtitle">Riepilogo Finale</div>
+            <h1>Verifica e Invia</h1>
+        </div>
+        <div id="final-summary" class="summary-card"></div>
+        
+        <button class="btn btn-wa" onclick="inviaWhatsApp()">INVIA WHATSAPP</button>
+        <button class="btn btn-pdf" onclick="scaricaPDF()">SALVA PDF</button>
+        <button class="btn btn-back" onclick="vaiA(2)">MODIFICA QUANTITÀ</button>
+    </div>
 </div>
 
 <script>
-    // Elenco completo basato sul tuo PDF
-    const listino = [
-        "Alprazolam (0,25mg)", "Amlodipina (5mg)", "Amoxicillina + Clav (875+125)", 
-        "Atorvastatina (10/20/40/80mg)", "Azitromicina (500mg)", "Bisoprololo (Tutti i dosaggi)", 
-        "Ciprofloxacina (250/500/750mg)", "Esomeprazolo (20/40mg)", "Fluconazolo (100/150/200mg)", 
-        "Furosemide (25/500mg - Fiale)", "Ibuprofene (200/400/600mg)", "Ketoprofene (50/80/200mg RP)", 
-        "Levotiroxina (Tutti i dosaggi)", "Metformina (500/850/1000mg)", "Omeprazolo (10/20mg)", 
-        "Pantoprazolo (20/40mg)", "Paracetamolo (500/1000mg)", "Pregabalin (Tutti i dosaggi)", 
-        "Ramipril (2,5/5/10mg)", "Sertralina (50/100mg)", "Tadalafil/Sildenafil (Tutti)", "Valsartan (40 a 320mg)"
-    ];
+    const farmaci = [
+        "Alprazolam 0.25/0.50/1mg", "Amlodipina 5/10mg", "Amoxicillina + Clav 875+125", 
+        "Atorvastatina 10/20/40/80mg", "Azitromicina 500mg", "Bisoprololo (Tutti i dosaggi)", 
+        "Ciprofloxacina 250/500/750mg", "Esomeprazolo 20/40mg", "Fluconazolo 100/150/200mg", 
+        "Furosemide 25/500mg", "Ibuprofene 200/400/600mg", "Ketoprofene 50/80/200mg", 
+        "Levotiroxina (Tutti i dosaggi)", "Metformina 500/850/1000mg", "Omeprazolo 10/20mg", 
+        "Pantoprazolo 20/40mg", "Paracetamolo 500/1000mg", "Pregabalin (Tutti i dosaggi)", 
+        "Ramipril 2.5/5/10mg", "Sertralina 50/100mg", "Tadalafil/Sildenafil (Tutti)", "Valsartan 40 a 320mg"
+    ].sort();
 
-    // Ordinamento alfabetico automatico
-    listino.sort();
+    // Inizializza data odierna
+    document.getElementById('orderDate').valueAsDate = new Date();
 
-    const container = document.getElementById('product-container');
-    listino.forEach(prod => {
-        container.innerHTML += `
+    const listDiv = document.getElementById('product-list');
+    farmaci.forEach(f => {
+        listDiv.innerHTML += `
             <div class="item-row">
-                <span class="item-name">${prod}</span>
-                <input type="number" class="qty-input" data-name="${prod}" min="0" placeholder="0">
+                <span class="item-name">${f}</span>
+                <input type="number" class="qty-input" data-name="${f}" min="0" placeholder="0">
             </div>
         `;
     });
 
-    function getDati() {
-        const f = document.getElementById('farmName').value || "Farmacia";
-        const n = document.getElementById('farmNotes').value || "Nessuna";
-        let r = [];
+    function vaiA(step) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        window.scrollTo(0,0);
+        if(step === 3) generaRiepilogo();
+    }
+
+    function generaRiepilogo() {
+        const farm = document.getElementById('farmName').value || "Farmacia";
+        const date = document.getElementById('orderDate').value;
+        const note = document.getElementById('farmNotes').value || "Nessuna";
+        let righe = "";
+        
         document.querySelectorAll('.qty-input').forEach(i => {
-            if(i.value > 0) r.push({nome: i.dataset.name, qty: i.value});
+            if(i.value > 0) righe += `• ${i.dataset.name}: <b>${i.value}</b> pz<br>`;
         });
-        return { farmacia: f, note: n, righe: r };
+
+        document.getElementById('final-summary').innerHTML = `
+            <strong>Farmacia:</strong> ${farm}<br>
+            <strong>Data:</strong> ${date}<br>
+            <strong>Note:</strong> ${note}<br><br>
+            <strong>Prodotti:</strong><br>${righe || "Nessun prodotto selezionato"}
+        `;
     }
 
-    function apriRiepilogo() {
-        const d = getDati();
-        if(d.righe.length === 0) { alert("La bozza è vuota. Inserisci almeno un prodotto."); return; }
-        
-        let h = `<b>Cliente:</b> ${d.farmacia}<br><br>`;
-        d.righe.forEach(x => h += `• ${x.nome}: <b>${x.qty}</b> pz<br>`);
-        h += `<br><b>Note:</b> ${d.note}`;
-        
-        document.getElementById('review-content').innerHTML = h;
-        document.getElementById('modal-review').style.display = 'block';
-    }
-
-    function chiudiRiepilogo() {
-        document.getElementById('modal-review').style.display = 'none';
-    }
-
-    function inviaTutto() {
-        const d = getDati();
-        
-        // Generazione PDF
+    function scaricaPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.setFontSize(10).text("Consulente Towa: Alberto Bergaglio", 10, 10);
-        doc.setFontSize(16).text(`Ordine: ${d.farmacia}`, 10, 25);
-        doc.autoTable({ startY: 35, head: [['Molecola', 'Pezzi']], body: d.righe.map(x => [x.nome, x.qty]) });
-        doc.save(`Ordine_${d.farmacia}.pdf`);
-
-        // Invio WhatsApp
-        let m = `*ORDINE TOWA - ALBERTO BERGAGLIO*\n\n*Farmacia:* ${d.farmacia}\n\n`;
-        d.righe.forEach(x => m += `- ${x.nome}: *${x.qty}*\n`);
-        m += `\n*Note:* ${d.note}`;
+        const farm = document.getElementById('farmName').value || "Farmacia";
+        const date = document.getElementById('orderDate').value;
         
-        setTimeout(() => {
-            window.open(`https://wa.me/393935687977?text=${encodeURIComponent(m)}`);
-        }, 600);
+        doc.setFontSize(10).text("Agente: Alberto Bergaglio", 10, 10);
+        doc.setFontSize(16).text(`Ordine: ${farm}`, 10, 25);
+        doc.setFontSize(10).text(`Data: ${date}`, 10, 32);
+        
+        const data = [];
+        document.querySelectorAll('.qty-input').forEach(i => {
+            if(i.value > 0) data.push([i.dataset.name, i.value]);
+        });
+
+        doc.autoTable({ startY: 40, head: [['Molecola', 'Quantità']], body: data });
+        doc.save(`Ordine_${farm}.pdf`);
+    }
+
+    function inviaWhatsApp() {
+        const farm = document.getElementById('farmName').value || "Farmacia";
+        const note = document.getElementById('farmNotes').value || "Nessuna";
+        let m = `*ORDINE TOWA - BERGAGLIO*\n\n*Farmacia:* ${farm}\n*Note:* ${note}\n\n*DETTAGLIO:*\n`;
+        
+        document.querySelectorAll('.qty-input').forEach(i => {
+            if(i.value > 0) m += `- ${i.dataset.name}: *${i.value}*\n`;
+        });
+
+        window.open(`https://wa.me/393935687977?text=${encodeURIComponent(m)}`);
     }
 </script>
 </body>
