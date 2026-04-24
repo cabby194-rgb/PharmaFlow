@@ -4,79 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Towa Order - Alberto Bergaglio</title>
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/albeberg/ordine/main/icon.png">
+    
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root { --navy: #0A2540; --teal: #00A896; --fog: #F4F7FA; }
         body { font-family: 'DM Sans', sans-serif; background: var(--fog); margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--fog); padding-bottom: 15px; }
-        .header h1 { color: var(--navy); font-size: 24px; margin: 5px 0; }
-        .subtitle { color: var(--teal); font-size: 14px; font-weight: bold; text-transform: uppercase; }
-        label { font-size: 11px; color: #888; font-weight: bold; display: block; margin-bottom: 5px; }
-        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: var(--fog); font-size: 16px; }
-        .section-name { background: var(--navy); color: white; padding: 8px 15px; border-radius: 8px; font-size: 13px; margin: 20px 0 10px 0; font-weight: bold; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid var(--fog); }
-        .item-name { font-weight: 600; font-size: 14px; color: var(--navy); flex: 1; }
-        .qty-input { width: 65px; padding: 10px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; }
+        .header h1 { color: var(--navy); font-size: 22px; margin: 5px 0; }
+        .subtitle { color: var(--teal); font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        label { font-size: 11px; color: #888; font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
+        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: #fff; font-size: 16px; }
+
+        .product-list { margin-top: 20px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--fog); }
+        .item-name { font-weight: 600; font-size: 15px; color: var(--navy); flex: 1; }
+        .qty-input { width: 65px; padding: 10px; border: 2px solid var(--fog); border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; color: var(--teal); appearance: none; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 15px; transition: 0.3s; }
         .btn-check { background: var(--navy); color: white; }
         .btn-wa { background: #25D366; color: white; }
-        .btn-pdf { background: var(--teal); color: white; }
         .btn-edit { background: #eee; color: #666; }
+
         #modal-review { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .review-card { background: var(--fog); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-<div id="main-app" class="container">
+
+<div id="app-content" class="container">
     <div class="header">
-        <div class="subtitle">Agente Towa Pharmaceutical</div>
-        <h1>Alberto Bergaglio</h1>
+        <div class="subtitle">Consulenza Alberto Bergaglio</div>
+        <h1>Towa Order List</h1>
     </div>
+
     <label>Farmacia</label>
-    <input type="text" id="farmName" placeholder="Nome della farmacia">
-    <label>Note</label>
-    <textarea id="farmNotes" rows="2" placeholder="Note (es. sconti, urgenze)"></textarea>
+    <input type="text" id="farmName" placeholder="Inserisci nome farmacia">
 
-    <div class="section-name">SISTEMA CARDIOVASCOLARE</div>
-    <div class="item-row"><span class="item-name">Atorvastatina (10/20/40/80mg)</span><input type="number" class="qty-input" data-name="Atorvastatina" min="0"></div>
-    <div class="item-row"><span class="item-name">Bisoprololo (1.25/2.5/3.75/5/10mg)</span><input type="number" class="qty-input" data-name="Bisoprololo" min="0"></div>
-    <div class="item-row"><span class="item-name">Ramipril (2.5/5/10mg)</span><input type="number" class="qty-input" data-name="Ramipril" min="0"></div>
-    <div class="item-row"><span class="item-name">Valsartan (40/80/160/320mg)</span><input type="number" class="qty-input" data-name="Valsartan" min="0"></div>
-    <div class="item-row"><span class="item-name">Amlodipina (5/10mg)</span><input type="number" class="qty-input" data-name="Amlodipina" min="0"></div>
+    <label>Prodotti (Ordine Alfabetico)</label>
+    <div id="product-container" class="product-list">
+        </div>
 
-    <div class="section-name">APPARATO GASTROINTESTINALE</div>
-    <div class="item-row"><span class="item-name">Pantoprazolo (20/40mg)</span><input type="number" class="qty-input" data-name="Pantoprazolo" min="0"></div>
-    <div class="item-row"><span class="item-name">Esomeprazolo (20/40mg)</span><input type="number" class="qty-input" data-name="Esomeprazolo" min="0"></div>
-    <div class="item-row"><span class="item-name">Omeprazolo (10/20mg)</span><input type="number" class="qty-input" data-name="Omeprazolo" min="0"></div>
+    <label>Note ordine</label>
+    <textarea id="farmNotes" rows="2" placeholder="Note su dosaggi o urgenze..."></textarea>
 
-    <div class="section-name">SISTEMA NERVOSO E DOLORE</div>
-    <div class="item-row"><span class="item-name">Alprazolam (0.25/0.50/1mg - Gtt)</span><input type="number" class="qty-input" data-name="Alprazolam" min="0"></div>
-    <div class="item-row"><span class="item-name">Sertralina (50/100mg)</span><input type="number" class="qty-input" data-name="Sertralina" min="0"></div>
-    <div class="item-row"><span class="item-name">Paracetamolo (500/1000mg)</span><input type="number" class="qty-input" data-name="Paracetamolo" min="0"></div>
-    <div class="item-row"><span class="item-name">Ibuprofene (400/600mg)</span><input type="number" class="qty-input" data-name="Ibuprofene" min="0"></div>
-    <div class="item-row"><span class="item-name">Pregabalin (Tutti i dosaggi)</span><input type="number" class="qty-input" data-name="Pregabalin" min="0"></div>
-
-    <div class="section-name">ANTIBIOTICI</div>
-    <div class="item-row"><span class="item-name">Amoxicillina+Clav. (875+125mg)</span><input type="number" class="qty-input" data-name="Amoxicillina+Clav" min="0"></div>
-    <div class="item-row"><span class="item-name">Azitromicina (500mg)</span><input type="number" class="qty-input" data-name="Azitromicina" min="0"></div>
-    <div class="item-row"><span class="item-name">Ciprofloxacina (250/500/750mg)</span><input type="number" class="qty-input" data-name="Ciprofloxacina" min="0"></div>
-
-    <button class="btn btn-check" onclick="apriRiepilogo()">VERIFICA ORDINE</button>
+    <button class="btn btn-check" onclick="apriRiepilogo()">VERIFICA BOZZA</button>
 </div>
 
 <div id="modal-review">
-    <h2 style="color:var(--navy)">Verifica il tuo Ordine</h2>
-    <div id="review-content" style="background:var(--fog); padding:15px; border-radius:10px; margin-bottom:20px;"></div>
-    <button class="btn btn-wa" onclick="inviaWA()">INVIA SU WHATSAPP</button>
-    <button class="btn btn-pdf" onclick="scaricaPDF()">SALVA PDF (ARCHIVIO)</button>
-    <button class="btn btn-edit" onclick="chiudiRiepilogo()">TORNA ALLA MODIFICA</button>
+    <h2 style="color:var(--navy)">Anteprima Ordine</h2>
+    <div id="review-content" class="review-card"></div>
+    
+    <button class="btn btn-wa" onclick="inviaTutto()">SCARICA PDF E INVIA WHATSAPP</button>
+    <button class="btn btn-edit" onclick="chiudiRiepilogo()">TORNA ALLA MODIFICA (BOZZA)</button>
 </div>
 
 <script>
+    // Elenco completo basato sul tuo PDF
+    const listino = [
+        "Alprazolam (0,25mg)", "Amlodipina (5mg)", "Amoxicillina + Clav (875+125)", 
+        "Atorvastatina (10/20/40/80mg)", "Azitromicina (500mg)", "Bisoprololo (Tutti i dosaggi)", 
+        "Ciprofloxacina (250/500/750mg)", "Esomeprazolo (20/40mg)", "Fluconazolo (100/150/200mg)", 
+        "Furosemide (25/500mg - Fiale)", "Ibuprofene (200/400/600mg)", "Ketoprofene (50/80/200mg RP)", 
+        "Levotiroxina (Tutti i dosaggi)", "Metformina (500/850/1000mg)", "Omeprazolo (10/20mg)", 
+        "Pantoprazolo (20/40mg)", "Paracetamolo (500/1000mg)", "Pregabalin (Tutti i dosaggi)", 
+        "Ramipril (2,5/5/10mg)", "Sertralina (50/100mg)", "Tadalafil/Sildenafil (Tutti)", "Valsartan (40 a 320mg)"
+    ];
+
+    // Ordinamento alfabetico automatico
+    listino.sort();
+
+    const container = document.getElementById('product-container');
+    listino.forEach(prod => {
+        container.innerHTML += `
+            <div class="item-row">
+                <span class="item-name">${prod}</span>
+                <input type="number" class="qty-input" data-name="${prod}" min="0" placeholder="0">
+            </div>
+        `;
+    });
+
     function getDati() {
         const f = document.getElementById('farmName').value || "Farmacia";
         const n = document.getElementById('farmNotes').value || "Nessuna";
@@ -86,31 +103,42 @@
         });
         return { farmacia: f, note: n, righe: r };
     }
+
     function apriRiepilogo() {
         const d = getDati();
-        if(d.righe.length === 0) { alert("Ordine vuoto!"); return; }
-        let h = `<b>Farmacia:</b> ${d.farmacia}<br><br>`;
-        d.righe.forEach(x => h += `• ${x.nome}: <b>${x.qty}</b><br>`);
+        if(d.righe.length === 0) { alert("La bozza è vuota. Inserisci almeno un prodotto."); return; }
+        
+        let h = `<b>Cliente:</b> ${d.farmacia}<br><br>`;
+        d.righe.forEach(x => h += `• ${x.nome}: <b>${x.qty}</b> pz<br>`);
         h += `<br><b>Note:</b> ${d.note}`;
+        
         document.getElementById('review-content').innerHTML = h;
         document.getElementById('modal-review').style.display = 'block';
     }
-    function chiudiRiepilogo() { document.getElementById('modal-review').style.display = 'none'; }
-    function inviaWA() {
+
+    function chiudiRiepilogo() {
+        document.getElementById('modal-review').style.display = 'none';
+    }
+
+    function inviaTutto() {
         const d = getDati();
+        
+        // Generazione PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(10).text("Consulente Towa: Alberto Bergaglio", 10, 10);
+        doc.setFontSize(16).text(`Ordine: ${d.farmacia}`, 10, 25);
+        doc.autoTable({ startY: 35, head: [['Molecola', 'Pezzi']], body: d.righe.map(x => [x.nome, x.qty]) });
+        doc.save(`Ordine_${d.farmacia}.pdf`);
+
+        // Invio WhatsApp
         let m = `*ORDINE TOWA - ALBERTO BERGAGLIO*\n\n*Farmacia:* ${d.farmacia}\n\n`;
         d.righe.forEach(x => m += `- ${x.nome}: *${x.qty}*\n`);
         m += `\n*Note:* ${d.note}`;
-        window.open(`https://wa.me/393935687977?text=${encodeURIComponent(m)}`);
-    }
-    function scaricaPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const d = getDati();
-        doc.setFontSize(10).text("Agente Towa: Alberto Bergaglio", 10, 10);
-        doc.setFontSize(18).text("Ordine Prodotti Towa", 10, 25);
-        doc.autoTable({ startY: 40, head: [['Prodotto', 'Quantità']], body: d.righe.map(x => [x.nome, x.qty]) });
-        doc.save(`Ordine_${d.farmacia}.pdf`);
+        
+        setTimeout(() => {
+            window.open(`https://wa.me/393935687977?text=${encodeURIComponent(m)}`);
+        }, 600);
     }
 </script>
 </body>
